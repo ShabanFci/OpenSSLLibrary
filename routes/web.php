@@ -18,3 +18,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::post('fileEncryption' , [FileController::class, 'fileEncryption'])->name('fileEncryption');
+Route::post('fileDecryption' , [FileController::class, 'fileDecryption'])->name('fileDecryption');

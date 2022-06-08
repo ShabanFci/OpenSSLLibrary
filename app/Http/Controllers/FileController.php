@@ -11,28 +11,34 @@ class FileController extends Controller
     public function fileEncryption(request $request)
     {
 
-       $fileName = $request->uploadedFile->getClientOriginalName();
+       $fileName = $request->uploadedFile;
        
         
         $encrypted =  Crypt::encryptString($fileName);
-       // return $this->storeFile();
+     
+        
+    return response()->json([
+        'encrypted' => $encrypted
+       
+    ]);
+    }
+     
+    public function fileDecryption(request $request)
+    {
+
+       $fileName = $request->uploadedFile;
+
         try {
-        $decrypted = Crypt::decryptString($encrypted);
+        $decrypted = Crypt::decryptString($fileName);
     } catch (DecryptException $e) {
-        //
+      return false;
     }
     return response()->json([
-        'encrypted' => $encrypted ,
-       // 'decrypted'=> $decrypted
+        'decrypted' => $decrypted ,
+        'fileName' =>$fileName
+       
     ]);
     }
 
-    function storeFile($selectedFile, $location)
-    {
-        $ext    = $selectedFile->getClientOriginalExtension();
-        $file   = date('YmdHis') . rand(1, 99999) . '.' . $ext;
-       // $selectedFile->storeAs($location, $file);
-        //$location = str_replace('public', 'storage', $location);
-        return $file;
-    }
+   
 }
