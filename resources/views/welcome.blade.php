@@ -3,107 +3,98 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <title>Laravel</title>
-
-        <!-- Fonts -->
+        <title>OpenSSLLibrary</title>
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-        <style>
-            body {
-                font-family: 'Nunito', sans-serif;
-            }
-        </style>
-      
+        <link rel="stylesheet" href="{{ asset('/css/custom.css') }}">   
     </head>
     <body >
-    <form   enctype="multipart/form-data"> 
-    <meta name="csrf-token" content="{{ csrf_token() }}"> 
-        <input type="file" id="file" name="uploadedFile" onchange="fileInfo()"/>
-        <div><label for="fileName">File Name : </label><span id="fileName" ></span></div>
-        <div><label for="fileSize">File Size(in bytes) : </label><span id="fileSize" ></span></div>
-        <div><label for="fileExtension">File Extension : </label><span id="fileExtension" ></span></div>
-        <input type="submit" value="encrypt" id="fileEncrypt" /> 
-        <input type="submit" value="decrypt" id="fileDecrypt" /> 
-    </form>
-    <input type="button" value="fff" onclick="download(fileName, 'img')" /> 
+        <form id="file-upload-form" class="uploader" enctype="multipart/form-data">
+            <meta name="csrf-token" content="{{ csrf_token() }}"> 
+            <h3>OpenSSLLibrary Encryption/Decryption</h3>
+            <input id="uploadedFile" type="file" name="fileUpload"  onchange="fileInfo()" />
+            <label for="uploadedFile" id="file-drag">
+                <div id="start">
+                    <i class="fa fa-download" aria-hidden="true"></i>
+                    <div>Select a file</div>
+                    <span id="uploadedFile-btn" class="btn btn-primary">Select a file</span>
+                    <label for="fileName">File Name : <span id="fileName" ></span></label>
+                    <label for="fileSize">File Size(in bytes) :<span id="fileSize" ></span> </label>
+                    <label for="fileExtension">File Extension : <span id="fileExtension" ></span></label>
+                </div>
+            </label>
+            <input class="btn btn-primary" type="submit" value="encrypt" id="fileEncrypt" /> 
+            <input class="btn btn-primary" type="submit" value="decrypt" id="fileDecrypt" /> 
+        </form>   
     </body>
-    <script src="http://code.jquery.com/jquery-3.3.1.min.js"
-      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-      crossorigin="anonymous">
-</script>
+
+
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script>
-
+        // Getting The Uploaded File Info
         function fileInfo(){
-
-            var fileName = document.getElementById('file').files[0].name;
-            var FileSize = document.getElementById('file').files[0].size;
+            var fileName = document.getElementById('uploadedFile').files[0].name;
+            var FileSize = document.getElementById('uploadedFile').files[0].size;
             var fileExtension = fileName.split('.').pop();
-
             document.getElementById('fileName').innerHTML  = fileName;
             document.getElementById('fileSize').innerHTML = FileSize;
             document.getElementById('fileExtension').innerHTML = fileExtension;  
    
         }
-
-
-        // Function to download data to a file
         
-
-  
-    jQuery(document).ready(function(){
+        jQuery(document).ready(function(){
+            // file Encrypt Action
             jQuery('#fileEncrypt').click(function(e){
                e.preventDefault();
                $.ajaxSetup({
                   headers: {
                       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                   }
-              });
-               jQuery.ajax({
-                  url: "{{ url('/fileEncryption') }}",
-                  method: 'post',
-                  data: {
-                    uploadedFile: jQuery('#file').val(),
-                    /* type: jQuery('#type').val(),
-                     price: jQuery('#price').val()*/
-                  },
-                  success: function(result){
-                  
-        let element = document.createElement('a')
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result.encrypted))
-        element.setAttribute('download', result.encrypted)
-        element.click()
-  
-                  }});
-               });
+                });
 
-               jQuery('#fileDecrypt').click(function(e){
+                var uploadedFile  = $('#uploadedFile').prop('files')[0];
+                var form_data = new FormData();
+                form_data.append('uploadedFile', uploadedFile);
+                $.ajax({
+                    url: "{{url('fileEncryption')}}",
+                    data: form_data,
+                    type: 'POST',
+                    contentType: false,
+                    processData: false,
+                    success: function(data){
+            
+                    let element = document.createElement('a')
+                    element.setAttribute('href', 'data:file;charset=utf-8,' + encodeURIComponent(data.encryptedFile))
+                    element.setAttribute('download', 'untitled')
+                    element.click()
+                }});
+            });
+
+            // file Decrypt Action
+            jQuery('#fileDecrypt').click(function(e){
                e.preventDefault();
                $.ajaxSetup({
                   headers: {
                       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                   }
-              });
-               jQuery.ajax({
-                  url: "{{ url('/fileDecryption') }}",
-                  method: 'post',
-                  data: {
-                    uploadedFile: jQuery('#file').val(),
-                    /* type: jQuery('#type').val(),
-                     price: jQuery('#price').val()*/
-                  },
-                  success: function(result){
-                  
-        let element = document.createElement('a')
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + decodeURIComponent(result.decrypted))
-        element.setAttribute('download', result.decrypted)
-        element.click()
-  
-                  }});
-               });
-            });
+                });
     
-
-        
-
+                var uploadedFile  = $('#uploadedFile').prop('files')[0];
+                var form_data = new FormData();
+                form_data.append('uploadedFile', uploadedFile);
+               $.ajax({
+                    url: "{{url('fileDecryption')}}",
+                    data: form_data,
+                    type: 'POST',
+                    contentType: false,
+                    processData: false,
+                    success: function(data){                  
+                        let element = document.createElement('a')
+                        element.setAttribute('href', 'data:file;charset=utf-8,' + encodeURIComponent(data.decryptedFile))
+                        element.setAttribute('download', 'untitled')
+                        element.click()
+  
+                    }});
+                });
+            });
     </script>
 </html>

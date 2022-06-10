@@ -8,36 +8,27 @@ use Illuminate\Contracts\Encryption\DecryptException;
 
 class FileController extends Controller
 {
-    public function fileEncryption(request $request)
+    public function fileEncryption(Request $request)
     {
-
-       $fileName = $request->uploadedFile;
-       
-        
-        $encrypted =  Crypt::encryptString($fileName);
-     
-        
-    return response()->json([
-        'encrypted' => $encrypted
-       
-    ]);
+        $fileName = $request->file('uploadedFile');
+        $encryptedFile = Crypt::encryptString($fileName->getContent());
+        return response()->json([
+           'encryptedFile' => $encryptedFile
+        ]);
     }
      
-    public function fileDecryption(request $request)
+    public function fileDecryption(Request $request)
     {
-
-       $fileName = $request->uploadedFile;
-
+        $fileName = $request->file('uploadedFile');
         try {
-        $decrypted = Crypt::decryptString($fileName);
-    } catch (DecryptException $e) {
-      return false;
-    }
-    return response()->json([
-        'decrypted' => $decrypted ,
-        'fileName' =>$fileName
-       
-    ]);
+            $decryptedFile = Crypt::decryptString($fileName->getContent());
+        } catch (DecryptException $e) {
+            return false;
+        }
+    
+        return response()->json([
+            'decryptedFile' => $decryptedFile
+        ]); 
     }
 
    
